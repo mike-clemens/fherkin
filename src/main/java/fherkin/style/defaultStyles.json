@@ -1,0 +1,217 @@
+{
+	"cellStyles": {
+		"tag": {
+			"alignment": "left"
+		},
+		"feature": {
+			"alignment": "right",
+			"indention": "1"
+		},
+		"featureText": {
+			"alignment": "left"
+		},
+		"scenario": {
+			"alignment": "right",
+			"indention": "1"
+		},
+		"scenarioOutline": {
+			"extends": "scenario"
+		},
+		"background": {
+			"extends": "scenario"
+		},
+		"scenarioText": {
+			"alignment": "left"
+		},
+		"scenarioOutlineText": {
+			"extends": "scenarioText"
+		},
+		"backgroundText": {
+			"extends": "scenarioText"
+		},
+		"given": {
+			"alignment": "right",
+			"indention": "1"
+		},
+		"when": {
+			"extends": "given"
+		},
+		"then": {
+			"extends": "given"
+		},
+		"and": {
+			"extends": "given"
+		},
+		"but": {
+			"extends": "given"
+		},
+		"givenText": {
+			"alignment": "left"
+		},
+		"whenText": {
+			"extends": "givenText"
+		},
+		"thenText": {
+			"extends": "givenText"
+		},
+		"andText": {
+			"extends": "givenText"
+		},
+		"butText": {
+			"extends": "givenText"
+		},
+		"examples": {
+			"alignment": "left"
+		},
+		"dataTable": {
+			"borderTop": "thin",
+			"borderLeft": "thin",
+			"borderRight": "thin",
+			"borderBottom": "thin",
+			"topBorderColor": "black",
+			"leftBorderColor": "black",
+			"rightBorderColor": "black",
+			"bottomBorderColor": "black"
+		},
+		"dataTableHeading": {
+			"extends": "dataTable",
+			"fillPattern": "solid foreground",
+			"fillForegroundColor": "grey 25 percent"
+		},
+		"dataTableHeadingAlignLeft": {
+			"extends": "dataTableHeading",
+			"alignment": "left"
+		},
+		"dataTableHeadingAlignRight": {
+			"extends": "dataTableHeading",
+			"alignment": "right"
+		},
+		"dataTableCellAlignLeft": {
+			"extends": "dataTable",
+			"alignment": "left"
+		},
+		"dataTableCellAlignRight": {
+			"extends": "dataTable",
+			"alignment": "right"
+		},
+		"comment": {
+			"alignment": "left"
+		}
+	},
+	"fonts": {
+		"tag": {
+			"bold": "yes",
+			"color": "cornflower blue",
+			"fontHeightInPoints": "12"
+		},
+		"feature": {
+			"bold": "yes",
+			"color": "dark blue",
+			"fontHeightInPoints": "14"
+		},
+		"featureText": {
+			"color": "black",
+			"fontHeightInPoints": "11"
+		},
+		"scenario": {
+			"bold": "yes",
+			"color": "dark blue",
+			"fontHeightInPoints": "12"
+		},
+		"scenarioOutline": {
+			"extends": "scenario"
+		},
+		"background": {
+			"extends": "scenario"
+		},
+		"scenarioText": {
+			"color": "black",
+			"fontHeightInPoints": "11"
+		},
+		"scenarioOutlineText": {
+			"extends": "scenarioText"
+		},
+		"backgroundText": {
+			"extends": "scenarioText"
+		},
+		"given": {
+			"bold": "yes",
+			"color": "blue"
+		},
+		"when": {
+			"extends": "given"
+		},
+		"then": {
+			"extends": "given"
+		},
+		"and": {
+			"extends": "given"
+		},
+		"but": {
+			"extends": "given"
+		},
+		"givenText": {
+			"bold": "no",
+			"color": "black",
+			"fontHeightInPoints": "11"
+		},
+		"whenText": {
+			"extends": "givenText"
+		},
+		"thenText": {
+			"extends": "givenText"
+		},
+		"andText": {
+			"extends": "givenText"
+		},
+		"butText": {
+			"extends": "givenText"
+		},
+		"givenTextVariable": {
+			"extends": "givenText",
+			"bold": "yes",
+			"color": "orange"
+		},
+		"whenTextVariable": {
+			"extends": "givenTextVariable"
+		},
+		"thenTextVariable": {
+			"extends": "givenTextVariable"
+		},
+		"andTextVariable": {
+			"extends": "givenTextVariable"
+		},
+		"butTextVariable": {
+			"extends": "givenTextVariable"
+		},
+		"examples": {
+			"bold": "yes",
+			"color": "dark blue",
+			"fontHeightInPoints": "12"
+		},
+		"dataTable": {
+			"color": "black",
+			"fontHeightInPoints": "11"
+		},
+		"dataTableHeading": {
+			"extends": "dataTable",
+			"bold": "yes"
+		},
+		"dataTableHeadingAlignLeft": {
+			"extends": "dataTableHeading"
+		},
+		"dataTableHeadingAlignRight": {
+			"extends": "dataTableHeading"
+		},
+		"dataTableCellAlignLeft": {
+			"extends": "dataTable"
+		},
+		"dataTableCellAlignRight": {
+			"extends": "dataTable"
+		},
+		"comment": {
+			"italic": "yes",
+			"color": "green"
+		}
+	}
+}
