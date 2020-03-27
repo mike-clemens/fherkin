@@ -1,9 +1,17 @@
 package fherkin;
 
+import fherkin.lang.GherkinKeywords;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -13,7 +21,16 @@ import org.junit.Test;
  */
 public class MainTest extends Main {
 	
+	private Map<String, URL> resources;
 	private Converter converter;
+	
+	@Before
+	public void before() {
+		resources = new HashMap<String, URL>();
+		
+		getDefaultLogger().removeAllAppenders();
+		getDefaultLogger().setLevel(Level.OFF);
+	}
 	
 	///// command line arguments
 	
@@ -28,6 +45,38 @@ public class MainTest extends Main {
 	public void testMainInvalidCommandLine() {
 		Assert.assertEquals(10, doMain(new String[] {
 				"--xyz"
+		}));
+	}
+	
+	@Test
+	public void testMainLogLevel() {
+		Assert.assertEquals(0, doMain(new String[] {
+				"--logLevel",
+				"FaTaL",
+				"--sourceFiles",
+				"*.xls"
+		}));
+		
+		Assert.assertEquals(Level.FATAL, getDefaultLogger().getLevel());
+	}
+	
+	@Test
+	public void testMainLogLeveDefaultl() {
+		Assert.assertEquals(0, doMain(new String[] {
+				"--sourceFiles",
+				"*.xls"
+		}));
+		
+		Assert.assertEquals(Level.INFO, getDefaultLogger().getLevel());
+	}
+	
+	@Test
+	public void testMainLogLevelInvalid() {
+		Assert.assertEquals(10, doMain(new String[] {
+				"--logLevel",
+				"really_really_serious",
+				"--sourceFiles",
+				"*.xls"
 		}));
 	}
 	
@@ -408,14 +457,61 @@ public class MainTest extends Main {
 		Assert.assertNull(getBooleanOption("xyz"));
 	}
 	
+	@Test
+	public void testGetLogLevelOption() {
+		Assert.assertEquals(Level.ALL,   getLogLevelOption("aLL"));
+		Assert.assertEquals(Level.TRACE, getLogLevelOption("TRaCe"));
+		Assert.assertEquals(Level.DEBUG, getLogLevelOption("DeBuG"));
+		Assert.assertEquals(Level.INFO,  getLogLevelOption("iNFo"));
+		Assert.assertEquals(Level.WARN,  getLogLevelOption("WaRN"));
+		Assert.assertEquals(Level.ERROR, getLogLevelOption("eRRoR"));
+		Assert.assertEquals(Level.FATAL, getLogLevelOption("FaTaL"));
+		Assert.assertEquals(Level.OFF,   getLogLevelOption("oFF"));
+	}
+	
+	///// initLog4j
+	
+	@Test
+	public void testInitLog4j() {
+		initLog4j();
+		Assert.assertTrue(getDefaultLogger().getAllAppenders().hasMoreElements());
+	}
+	
+	@Test
+	public void testInitLog4jProperitesFileExists() throws MalformedURLException {
+		resources.put("log4j.properties", new URL("file:///"));
+		initLog4j();
+		Assert.assertFalse(getDefaultLogger().getAllAppenders().hasMoreElements());
+	}
+	
+	@Test
+	public void testInitLog4jXMLFileExists() throws MalformedURLException {
+		resources.put("log4j.xml", new URL("file:///"));
+		initLog4j();
+		Assert.assertFalse(getDefaultLogger().getAllAppenders().hasMoreElements());
+	}
+	
 	///// overridden methods
+	
+	@Override
+	protected URL getResource(String name) {
+		Assert.assertNotNull(super.getResource(GherkinKeywords.class.getPackage().getName().replaceAll("\\.", "/") + "/gherkin-languages.json"));
+		return resources.get(name);
+	}
+	
+	@Override
+	protected Logger getDefaultLogger() {
+		Assert.assertNotNull(super.getDefaultLogger());
+		return Logger.getLogger("fherkin.Main.testing.default.logger");
+	}
 	
 	@Override
 	protected Converter newConverter() {
 		Assert.assertNotNull(super.newConverter());
 		converter = new Converter() {
 			@Override
-			public void convert() throws IOException {
+			public int convert() throws IOException {
+				return 0;
 			}
 		};
 		

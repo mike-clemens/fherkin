@@ -1,5 +1,6 @@
 package fherkin.io.impl.text;
 
+import fherkin.LogHelper;
 import fherkin.io.impl.AbstractGherkinParser;
 import fherkin.model.GherkinEntry;
 import fherkin.model.location.Location;
@@ -65,6 +66,8 @@ public class TextGherkinParser extends AbstractGherkinParser {
 	
 	@Override
 	public List<GherkinEntry> parse() throws IOException {
+		LogHelper.trace(log, TextGherkinParser.class, "parse");
+		
 		BufferedReader in = new BufferedReader(reader);
 		try {
 			String line;
@@ -86,6 +89,8 @@ public class TextGherkinParser extends AbstractGherkinParser {
 	}
 	
 	protected SortedMap<Location, String> tokenize(int lineNumber, String line) {
+		LogHelper.trace(log, TextGherkinParser.class, "tokenize", lineNumber, line);
+		
 		SortedMap<Location, String> map = new TreeMap<Location, String>();
 
 		TextFileLocation location = new TextFileLocation();

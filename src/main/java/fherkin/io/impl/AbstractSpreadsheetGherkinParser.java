@@ -1,5 +1,6 @@
 package fherkin.io.impl;
 
+import fherkin.LogHelper;
 import fherkin.model.GherkinEntry;
 import fherkin.model.entry.Comment;
 import fherkin.model.location.Location;
@@ -16,6 +17,8 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -28,7 +31,9 @@ import org.apache.poi.ss.usermodel.Workbook;
  * @since 1.0.0
  */
 public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinParser {
-
+	
+	protected Log log = LogFactory.getLog(getClass());
+	
 	protected String filename;
 	protected InputStream inputStream;
 	
@@ -47,18 +52,23 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	
 	@Override
 	public List<GherkinEntry> parse() throws IOException {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "parse");
+		
 		Workbook workbook = parseWorkbook();
 		
 		int sheetCount = workbook.getNumberOfSheets();
 		for(int i = 0; i < sheetCount; i++)
 			processSheet(workbook.getSheetAt(i));
 		
+		log.debug("Parsed file: " + filename);
 		return entries;
 	}
 	
 	protected abstract Workbook parseWorkbook() throws IOException;
 	
 	protected void processSheet(Sheet sheet) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "processSheet", sheet);
+		
 		Iterator<Row> iterator = sheet.rowIterator();
 		Row row;
 		Pair<String, SortedMap<Location, String>> result;
@@ -95,6 +105,8 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	}
 	
 	protected boolean isKeyword(String value) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "isKeyword", value);
+		
 		if(value == null)
 			return false;
 		
@@ -119,6 +131,8 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	}
 	
 	protected boolean isDataTableKeyword(String value) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "isDataTableKeyword", value);
+		
 		if(value == null)
 			return false;
 		
@@ -135,6 +149,8 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	}
 
 	protected Pair<String, SortedMap<Location, String>> tokenize(Row row) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "tokenize", row);
+		
 		SpreadsheetLocation location = new SpreadsheetLocation();
 		location.setFilename(filename);
 		location.setSheet(row.getSheet().getSheetName());
@@ -196,6 +212,8 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	}
 	
 	protected String getCellValue(Cell cell) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "getCellValue", cell);
+		
 		switch(cell.getCellType()) {
 			case STRING:
 				return cell.getStringCellValue();
@@ -210,6 +228,8 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	}
 	
 	protected void processDataTable(List<SortedMap<Location, String>> dataTable) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "processDataTable", dataTable);
+		
 		// determine which columns of the data table have data
 		Set<Integer> columns = new TreeSet<Integer>();
 		int lastColumn = -1;
@@ -247,6 +267,8 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	
 	@Override
 	protected String getMatch(String text, Set<String> keywords) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "getMatch", text, keywords);
+		
 		for(String keyword : keywords)
 			if(text.equals(keyword)
 			|| (text.length() > keyword.length() && text.startsWith(keyword) && (
@@ -259,6 +281,8 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	
 	@Override
 	protected Comment processComment(SortedMap<Location, String> tokens) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "processComment", tokens);
+		
 		Comment comment = super.processComment(tokens);
 		if(comment != null)
 			comment.setText(formatText(rtrim(comment.getText())));
@@ -266,6 +290,8 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	}
 	
 	protected String formatText(String s) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "formatText", s);
+		
 		if(s == null)
 			return null;
 		
@@ -286,6 +312,8 @@ public abstract class AbstractSpreadsheetGherkinParser extends AbstractGherkinPa
 	}
 	
 	protected String rtrim(String s) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinParser.class, "rtrim", s);
+		
 		if(s == null)
 			return null;
 		

@@ -1,5 +1,6 @@
 package fherkin.io.impl.xls;
 
+import fherkin.LogHelper;
 import fherkin.io.impl.AbstractSpreadsheetGherkinWriter;
 import fherkin.style.FontConfig;
 import java.io.File;
@@ -34,12 +35,16 @@ public class XLSGherkinWriter extends AbstractSpreadsheetGherkinWriter {
 	
 	@Override
 	protected Workbook newWorkbook() {
+		LogHelper.trace(log, XLSGherkinWriter.class, "newWorkbook");
+		
 		workbook = new HSSFWorkbook();
 		return workbook;
 	}
 	
 	@Override
 	protected void setRichText(Cell cell, String[] texts, FontConfig[] fonts) {
+		LogHelper.trace(log, XLSGherkinWriter.class, "setRichText", cell, texts, fonts);
+		
 		if(texts.length != fonts.length)
 			throw new IllegalArgumentException();
 		

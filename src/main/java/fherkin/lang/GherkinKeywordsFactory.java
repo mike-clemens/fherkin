@@ -1,5 +1,6 @@
 package fherkin.lang;
 
+import fherkin.LogHelper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,7 +29,9 @@ public class GherkinKeywordsFactory {
 	
 	protected GherkinKeywordsFactory() {
 		try {
+			log.debug("Parsing gherkin languages");
 			root = parseGherkinLanguagesJSON();
+			log.debug("Parsed " + root.entrySet().size() + " languages");
 		}
 		catch(RuntimeException e) {
 			log.error(e.getClass().getSimpleName() + " caught:", e);
@@ -49,6 +52,8 @@ public class GherkinKeywordsFactory {
 	}
 	
 	public GherkinKeywords getInstanceForLocale(String locale) {
+		LogHelper.trace(log, GherkinKeywordsFactory.class, "getInstanceForLocale", locale);
+		
 		if(locale == null)
 			throw new IllegalArgumentException("locale cannot be null");
 		if(locale.length() < 1)
@@ -58,6 +63,8 @@ public class GherkinKeywordsFactory {
 	}
 
 	protected JSONObject parseGherkinLanguagesJSON() throws IOException, ParseException {
+		LogHelper.trace(log, GherkinKeywordsFactory.class, "parseGherkinLanguagesJSON");
+		
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		if(classLoader == null)
 			classLoader = getClass().getClassLoader();
@@ -72,6 +79,8 @@ public class GherkinKeywordsFactory {
 	}
 	
 	protected synchronized GherkinKeywords getOrCreateInstance(String locale) {
+		LogHelper.trace(log, GherkinKeywordsFactory.class, "getOrCreateInstance", locale);
+		
 		GherkinKeywords instance = instances.get(locale);
 		if(instance != null)
 			return instance;
@@ -95,6 +104,8 @@ public class GherkinKeywordsFactory {
 	}
 	
 	protected JSONObject findByLocale(JSONObject root, String locale) {
+		LogHelper.trace(log, GherkinKeywordsFactory.class, "findByLocale", root, locale);
+		
 		JSONObject o = (JSONObject) root.get(locale.replaceAll("\\_", "-"));
 		if(o != null)
 			return o;

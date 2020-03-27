@@ -1,5 +1,6 @@
 package fherkin.io.impl.xls;
 
+import fherkin.LogHelper;
 import fherkin.io.impl.AbstractSpreadsheetGherkinParser;
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +30,8 @@ public class XLSGherkinParser extends AbstractSpreadsheetGherkinParser {
 	
 	@Override
 	protected Workbook parseWorkbook() throws IOException {
+		LogHelper.trace(log, XLSGherkinParser.class, "parseWorkbook");
+		
 		try {
 			return new HSSFWorkbook(inputStream);
 		}

@@ -1,5 +1,6 @@
 package fherkin.io.impl;
 
+import fherkin.LogHelper;
 import fherkin.io.GherkinParser;
 import fherkin.io.GherkinSyntaxException;
 import fherkin.lang.GherkinKeywordType;
@@ -37,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 public abstract class AbstractGherkinParser implements GherkinParser {
 	
 	protected Log log = LogFactory.getLog(getClass());
+	
 	protected GherkinKeywords keywords;
 	protected List<GherkinEntry> entries = new ArrayList<GherkinEntry>();
 	protected Stack<GherkinEntry> stack = new Stack<GherkinEntry>();
@@ -47,6 +49,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected void processLine(SortedMap<Location, String> tokens) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "processLine");
+		
 		Pair<Location, String> pair = getLineText(tokens);
 		Location start = pair.getFirst();
 		String text = pair.getSecond();
@@ -58,7 +62,7 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 			
 			if(stack.size() < 1 && comment.getText().trim().startsWith("language: ")) {
 				String locale = comment.getText().trim().substring("language: ".length()).trim();
-				log.info("Changing locale: " + locale);
+				log.debug("Changing locale: " + locale);
 				keywords = GherkinKeywordsFactory.getInstance().getInstanceForLocale(locale);
 			}
 		}
@@ -118,6 +122,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected Pair<Location, String> getLineText(SortedMap<Location, String> tokens) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "getLineText", tokens);
+		
 		StringBuffer buffer = null;
 		String value;
 		Location start = null;
@@ -142,10 +148,13 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 
 	protected boolean isMatch(String text, Set<String> keywords) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "isMatch", keywords);
 		return getMatch(text, keywords) != null;
 	}
 	
 	protected String getMatch(String text, Set<String> keywords) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "getMatch", text, keywords);
+		
 		for(String keyword : keywords)
 			if(text.equals(keyword)
 			|| (text.length() > keyword.length() && text.startsWith(keyword) && Character.isWhitespace(text.charAt(keyword.length()))))
@@ -154,6 +163,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected String getTokensString(SortedMap<Location, String> tokens) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "getTokensString", tokens);
+		
 		StringBuffer buffer = new StringBuffer();
 		for(Map.Entry<Location, String> entry : tokens.entrySet())
 			if(entry.getValue().trim().length() < 1)
@@ -168,6 +179,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected Comment processComment(SortedMap<Location, String> tokens) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "processComment", tokens);
+		
 		Comment comment = null;
 		StringBuffer buffer = null;
 		for(Map.Entry<Location, String> entry : tokens.entrySet())
@@ -192,6 +205,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected void processFeature(SortedMap<Location, String> tokens, String keyword, String text, Location start, Comment comment) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "processFeature", tokens, keyword, text, start, comment);
+		
 		if(!text.startsWith(keyword + ":"))
 			throw new GherkinSyntaxException(start, "Expected colon after " + keyword);
 		if(stack.size() > 0)
@@ -213,6 +228,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected void processFeatureChild(SortedMap<Location, String> tokens, String keyword, String text, Location start, Comment comment, GherkinKeywordType type) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "processFeatureChild", tokens, keyword, text, start, type);
+		
 		if(!text.startsWith(keyword + ":"))
 			throw new GherkinSyntaxException(start, "Expected colon after " + keyword);
 		if(stack.size() < 1)
@@ -289,6 +306,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected void processStep(SortedMap<Location, String> tokens, String keyword, String text, Location start, Comment comment, GherkinKeywordType type) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "processStep", tokens, keyword, text, start, comment, type);
+		
 		if(text.startsWith(keyword + ":"))
 			throw new GherkinSyntaxException(start, "Unexpected colon after " + keyword);
 		if(stack.size() < 1)
@@ -322,6 +341,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected void processExamples(SortedMap<Location, String> tokens, String keyword, String text, Location start, Comment comment) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "processExamples", tokens, keyword, text, start, comment);
+		
 		if(!text.startsWith(keyword + ":"))
 			throw new GherkinSyntaxException(start, "Expected colon after " + keyword);
 		if(stack.size() < 1)
@@ -358,6 +379,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected void processDataTable(SortedMap<Location, String> tokens, String text, Location start, Comment comment) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "processDataTable", tokens, text, start, comment);
+		
 		if(stack.size() < 1)
 			throw new GherkinSyntaxException(start, "Data table must follow examples or step");
 		
@@ -428,6 +451,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected void processTags(SortedMap<Location, String> tokens, String text, Location start, Comment comment) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "processTags", tokens, text, start, comment);
+		
 		if(stack.size() > 0) {
 			GherkinEntry parent = stack.peek();
 			while(!(parent instanceof Feature) && stack.size() > 0) {
@@ -510,6 +535,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	}
 	
 	protected void validateTagName(Tag tag) {
+		LogHelper.trace(log, AbstractGherkinParser.class, "validateTagName", tag);
+		
 		for(char c : tag.getTag().toCharArray())
 			if(!Character.isLetter(c)
 			&& !Character.isDigit(c)

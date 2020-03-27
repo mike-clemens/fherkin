@@ -1,6 +1,7 @@
 package fherkin.io;
 
 import fherkin.FileFormat;
+import fherkin.LogHelper;
 import fherkin.io.impl.csv.CSVGherkinParser;
 import fherkin.io.impl.text.TextGherkinParser;
 import fherkin.io.impl.xls.XLSGherkinParser;
@@ -10,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Factory for gherkin parsers.
@@ -19,6 +22,8 @@ import org.apache.commons.csv.CSVFormat;
  */
 public class GherkinParserFactory {
 	
+	private Log log = LogFactory.getLog(getClass());
+	
 	private FileFormat fileFormat;
 	private File file;
 	private String filename;
@@ -27,6 +32,8 @@ public class GherkinParserFactory {
 	private CSVFormat csvFormat;
 	
 	public GherkinParser newParser() throws IOException {
+		LogHelper.trace(log, GherkinParserFactory.class, "newParser");
+		
 		switch(fileFormat) {
 			case FEATURE:
 				if(file != null)

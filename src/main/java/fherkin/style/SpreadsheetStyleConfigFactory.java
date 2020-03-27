@@ -1,5 +1,6 @@
 package fherkin.style;
 
+import fherkin.LogHelper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class SpreadsheetStyleConfigFactory {
 			classLoader = getClass().getClassLoader();
 		
 		try {
+			log.debug("Parsing default spreadsheet styles");
 			styleConfig = createConfig(classLoader.getResourceAsStream(getClass().getPackage().getName().replaceAll("\\.", "/") + "/defaultStyles.json"));
 		}
 		catch(IOException e) {
@@ -47,10 +49,13 @@ public class SpreadsheetStyleConfigFactory {
 	}
 	
 	public void setConfigFile(File configFile) throws IOException {
+		LogHelper.trace(log, SpreadsheetStyleConfigFactory.class, "setConfigFile", configFile);
 		createConfig(new FileInputStream(configFile));
 	}
 	
 	protected SpreadsheetStyleConfig createConfig(InputStream inputStream) throws IOException {
+		LogHelper.trace(log, SpreadsheetStyleConfigFactory.class, "createConfig");
+		
 		try {
 			JSONObject root = parse(inputStream);
 			return new SpreadsheetStyleConfigImpl(root);
@@ -61,6 +66,8 @@ public class SpreadsheetStyleConfigFactory {
 	}
 	
 	protected JSONObject parse(InputStream inputStream) {
+		LogHelper.trace(log, SpreadsheetStyleConfigFactory.class, "parse");
+		
 		try {
 			return (JSONObject) new JSONParser().parse(new InputStreamReader(inputStream));
 		}

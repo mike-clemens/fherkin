@@ -1,9 +1,12 @@
 package fherkin.io;
 
+import fherkin.LogHelper;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Scanner for finding files based on expressions.
@@ -13,9 +16,12 @@ import java.util.Map;
  */
 public class FileScanner {
 	
+	private Log log = LogFactory.getLog(getClass());
 	private Map<String, String> regexes = new HashMap<String, String>();
 	
 	public void scan(File dir, String path, FileScannerCallback callback) throws IOException {
+		LogHelper.trace(log, FileScanner.class, "scan", dir, path, callback);
+		
 		// validate the path string
 		path = path.replaceAll("\\\\", "/");
 		if(!isPathValid(path))
@@ -25,6 +31,8 @@ public class FileScanner {
 	}
 	
 	protected void doScan(String relativePath, File dir, String path, FileScannerCallback callback) throws IOException {
+		LogHelper.trace(log, FileScanner.class, "doScan", relativePath, dir, path, callback);
+		
 		int index = path.indexOf('/');
 		String expression = index < 0 ? path : path.substring(0, index);
 		String remainder = index < 0 ? null : path.substring(index + 1);
@@ -41,6 +49,9 @@ public class FileScanner {
 	}
 	
 	protected void doRecursiveScan(String relativePath, File dir, String path, FileScannerCallback callback) throws IOException {
+		LogHelper.trace(log, FileScanner.class, "doRecursiveScan", relativePath, dir, path, callback);
+		log.debug("Scanning directory: " + dir.getAbsolutePath());
+		
 		doFileScan(relativePath, dir, path, callback);
 		for(File file : dir.listFiles())
 			if(file.isDirectory())
@@ -48,12 +59,16 @@ public class FileScanner {
 	}
 	
 	protected void doFileScan(String relativePath, File dir, String path, FileScannerCallback callback) throws IOException {
+		LogHelper.trace(log, FileScanner.class, "doFileScan", relativePath, dir, path, callback);
+		
 		for(File file : dir.listFiles())
 			if(!file.isDirectory() && (path == null || isMatch(path, file)))
 				callback.process(file, relativePath == null ? file.getName() : relativePath + "/" + file.getName());
 	}
 	
 	protected boolean isMatch(String expression, File file) {
+		LogHelper.trace(log, FileScanner.class, "isMatch", expression, file);
+		
 		if(expression.equals("**") || expression.equals("*"))
 			return true;
 		
@@ -89,6 +104,8 @@ public class FileScanner {
 	}
 	
 	protected boolean isPathValid(String path) {
+		LogHelper.trace(log, FileScanner.class, "isPathValid", path);
+		
 		int index = path.indexOf("**");
 		if(index > -1) {
 			if(index > 0 && path.charAt(index - 1) != '/')

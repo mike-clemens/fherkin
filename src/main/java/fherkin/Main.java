@@ -1,6 +1,7 @@
 package fherkin;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.charset.Charset;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -12,6 +13,10 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 
 /**
  * Main class for the fherkin converter.
@@ -24,6 +29,7 @@ public class Main {
 	private Log log = LogFactory.getLog(getClass());
 	
 	private static final String HELP = "help";
+	private static final String LOG_LEVEL = "logLevel";
 	
 	private static final String SOURCE_FORMAT     = "sourceFormat";
 	private static final String SOURCE_ENCODING   = "sourceEncoding";
@@ -43,6 +49,8 @@ public class Main {
 	}
 	
 	protected int doMain(String[] args) {
+		initLog4j();
+		
 		// parse the command line arguments
 		CommandLineParser parser = new DefaultParser();
 		Options options = createOptions();
@@ -56,8 +64,17 @@ public class Main {
 			return printHelp(e.getMessage(), options, 10);
 		}
 		
+		// log level
+		if(commandLine.hasOption(LOG_LEVEL)) {
+			String s = commandLine.getOptionValue(LOG_LEVEL);
+			Level level = getLogLevelOption(s);
+			if(level == null)
+				return printHelp("Invalid " + LOG_LEVEL + " value; expected one of [all, trace, debug, info, warn, error, fatal, off], received " + s, options, 10);
+			getDefaultLogger().setLevel(level);
+		}
+		
 		// if the help option is provided, print the help message and abort
-		if(commandLine.hasOption("help"))
+		if(commandLine.hasOption(HELP))
 			return printHelp(null, options, 0);
 		
 		Converter instance = newConverter();
@@ -142,8 +159,7 @@ public class Main {
 		}
 		
 		try {
-			instance.convert();
-			return 0;
+			return instance.convert();
 		}
 		catch(Exception e) {
 			log.error(e.getClass().getSimpleName() + " caught:", e);
@@ -160,11 +176,18 @@ public class Main {
 	protected Options createOptions() {
 		Options options = new Options();
 		
-		// help
+		// help/logLevel
 		options.addOption(Option.builder()
 				.argName(HELP)
 				.longOpt(HELP)
 				.desc("displays this help message")
+				.build());
+		
+		options.addOption(Option.builder()
+				.argName(LOG_LEVEL)
+				.longOpt(LOG_LEVEL)
+				.hasArg(true)
+				.desc("log level (all, trace, debug, info, warn, error, fatal, off) -- if this is blank, info and higher will be logged")
 				.build());
 		
 		// source
@@ -279,8 +302,55 @@ public class Main {
 		return null;
 	}
 	
+	protected Level getLogLevelOption(String s) {
+		if("all".equalsIgnoreCase(s))
+			return Level.ALL;
+		if("trace".equalsIgnoreCase(s))
+			return Level.TRACE;
+		if("debug".equalsIgnoreCase(s))
+			return Level.DEBUG;
+		if("info".equalsIgnoreCase(s))
+			return Level.INFO;
+		if("warn".equalsIgnoreCase(s))
+			return Level.WARN;
+		if("error".equalsIgnoreCase(s))
+			return Level.ERROR;
+		if("fatal".equalsIgnoreCase(s))
+			return Level.FATAL;
+		if("off".equalsIgnoreCase(s))
+			return Level.OFF;
+		
+		return null;
+	}
+	
+	protected void initLog4j() {
+		// if there is a log4j configuration file on the classpath, no need to initialize
+		if(getResource("log4j.properties") != null
+		|| getResource("log4j.xml") != null)
+			return;
+		
+		// create a logger for the fherkin package and create a default appender
+		Logger logger = getDefaultLogger();
+		logger.setLevel(Level.INFO);
+		
+		PatternLayout layout = new PatternLayout("%d{ISO8601} %t [%-5p] %m%n");
+		logger.addAppender(new ConsoleAppender(layout));
+	}
+	
+	protected URL getResource(String name) {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		if(classLoader == null)
+			classLoader = Main.class.getClassLoader();
+		
+		return classLoader.getResource(name);
+	}
+	
+	protected Logger getDefaultLogger() {
+		return Logger.getLogger(getClass().getPackage().getName());
+	}
+	
 	protected Converter newConverter() {
 		return new Converter();
 	}
-
+	
 }

@@ -1,5 +1,6 @@
 package fherkin.io.impl.csv;
 
+import fherkin.LogHelper;
 import fherkin.io.impl.AbstractSpreadsheetGherkinWriter;
 import fherkin.style.CellStyleConfig;
 import fherkin.style.FontConfig;
@@ -71,6 +72,8 @@ public class CSVGherkinWriter extends AbstractSpreadsheetGherkinWriter {
 	
 	@Override
 	protected void doWrite(Workbook workbook) throws IOException {
+		LogHelper.trace(log, CSVGherkinWriter.class, "doWrite");
+		
 		CSVPrinter printer = format.print(out);
 		Sheet sheet = workbook.sheetIterator().next();
 		

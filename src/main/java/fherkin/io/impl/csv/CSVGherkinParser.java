@@ -1,5 +1,6 @@
 package fherkin.io.impl.csv;
 
+import fherkin.LogHelper;
 import fherkin.io.impl.AbstractSpreadsheetGherkinParser;
 import java.io.File;
 import java.io.FileInputStream;
@@ -100,6 +101,8 @@ public class CSVGherkinParser extends AbstractSpreadsheetGherkinParser {
 	
 	@Override
 	protected Workbook parseWorkbook() throws IOException {
+		LogHelper.trace(log, CSVGherkinParser.class, "parseWorkbook");
+		
 		Workbook workbook = new CSVWorkbook();
 		Sheet sheet = workbook.createSheet();
 		

@@ -1,5 +1,6 @@
 package fherkin.io.impl.text;
 
+import fherkin.LogHelper;
 import fherkin.io.impl.AbstractGherkinWriter;
 import fherkin.model.GherkinEntry;
 import fherkin.model.datatable.DataTable;
@@ -22,6 +23,8 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Gherkin writer that writes to a text feature file.
@@ -31,6 +34,7 @@ import java.util.List;
  */
 public class TextGherkinWriter extends AbstractGherkinWriter {
 	
+	protected Log log = LogFactory.getLog(getClass());
 	protected PrintWriter out;
 	
 	public TextGherkinWriter(File file) throws IOException {
@@ -55,6 +59,8 @@ public class TextGherkinWriter extends AbstractGherkinWriter {
 
 	@Override
 	public void write(List<GherkinEntry> entries) {
+		LogHelper.trace(log, TextGherkinWriter.class, "write");
+		
 		for(GherkinEntry entry : entries) {
 			if(entry instanceof Feature)
 				writeFeature((Feature) entry);
@@ -81,6 +87,8 @@ public class TextGherkinWriter extends AbstractGherkinWriter {
 	}
 	
 	protected void writeFeature(Feature feature) {
+		LogHelper.trace(log, TextGherkinWriter.class, "writeFeature", feature);
+		
 		// if the feature has any tags, write them prior to the feature line
 		if(feature.getTags() != null && feature.getTags().size() > 0)
 			for(Tag tag : feature.getTags())
@@ -108,6 +116,8 @@ public class TextGherkinWriter extends AbstractGherkinWriter {
 	}
 	
 	protected void writeScenario(Scenario scenario) {
+		LogHelper.trace(log, TextGherkinWriter.class, "writeScenario", scenario);
+		
 		out.println();
 		
 		// if the scenario has any tags, write them prior to the feature line
@@ -128,6 +138,8 @@ public class TextGherkinWriter extends AbstractGherkinWriter {
 	}
 	
 	protected void writeStep(Step step) {
+		LogHelper.trace(log, TextGherkinWriter.class, "writeStep", step);
+		
 		writeIndent(4 + step.getScenario().getMaxKeywordLength() - step.getKeyword().length());
 		out.print(step.getKeyword());
 		out.print(" ");
@@ -140,6 +152,8 @@ public class TextGherkinWriter extends AbstractGherkinWriter {
 	}
 	
 	protected void writeExamples(Examples examples) {
+		LogHelper.trace(log, TextGherkinWriter.class, "writeExamples", examples);
+		
 		writeIndent(4);
 		out.print(examples.getKeyword());
 		out.print(":");
@@ -151,6 +165,8 @@ public class TextGherkinWriter extends AbstractGherkinWriter {
 	}
 	
 	protected void writeDataTableRow(DataTableRow row) {
+		LogHelper.trace(log, TextGherkinWriter.class, "writeDataTableRow", row);
+		
 		DataTable dataTable = row.getDataTable();
 		HasDataTable owner = dataTable.getOwner();
 		
@@ -198,11 +214,15 @@ public class TextGherkinWriter extends AbstractGherkinWriter {
 	}
 	
 	protected void writeComment(Comment comment) {
+		LogHelper.trace(log, TextGherkinWriter.class, "writeComment", comment);
+		
 		out.print("#");
 		out.print(comment.getText());
 	}
 
 	protected void writeTag(Tag tag, int indent) {
+		LogHelper.trace(log, TextGherkinWriter.class, "writeTag", tag, indent);
+		
 		writeIndent(indent);
 		out.print("@");
 		out.print(tag.getTag());
@@ -216,6 +236,8 @@ public class TextGherkinWriter extends AbstractGherkinWriter {
 	}
 	
 	protected void writeIndent(int indent) {
+		LogHelper.trace(log, TextGherkinWriter.class, "writeIndent", indent);
+		
 		for(int i = 0; i < indent; i++)
 			out.print(" ");
 	}

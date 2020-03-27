@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Driver class for converting gherkin files from one format to another.
@@ -21,6 +23,8 @@ import org.apache.commons.csv.CSVFormat;
  * @since 1.0.0
  */
 public class Converter {
+	
+	private Log log = LogFactory.getLog(getClass());
 	
 	private FileFormat sourceFormat;
 	private Charset sourceEncoding;
@@ -34,7 +38,12 @@ public class Converter {
 	private File targetDir;
 	private boolean createTargetDirectories;
 	
-	public void convert() throws IOException {
+	private int result;
+	
+	public int convert() throws IOException {
+		LogHelper.trace(log, Converter.class, "convert");
+		result = 0;
+		
 		if(!sourceDir.exists())
 			throw new FileNotFoundException("Source directory does not exist: " + sourceDir.getAbsolutePath());
 		if(!sourceDir.isDirectory())
@@ -52,16 +61,32 @@ public class Converter {
 		new FileScanner().scan(sourceDir, sourceFiles, new FileScannerCallback() {
 			@Override
 			public void process(File sourceFile, String relativePath) throws IOException {
-				convertFile(
-						getSourceFileFormat(sourceFile),
-						sourceFile,
-						getTargetFileFormat(),
-						new File(createTargetDir(relativePath), getTargetFilename(relativePath)));
+				LogHelper.trace(log, getClass(), "process", sourceFile, relativePath);
+				
+				File targetFile = new File(createTargetDir(relativePath), getTargetFilename(relativePath));
+				try {
+					convertFile(
+							getSourceFileFormat(sourceFile),
+							sourceFile,
+							getTargetFileFormat(),
+							targetFile);
+					
+					log.info("Converted " + sourceFile.getAbsolutePath() + " to " + targetFile.getAbsolutePath());
+				}
+				catch(Exception e) {
+					log.error(e.getClass().getSimpleName() + " caught:", e);
+					log.error("Error converting file: " + sourceFile.getAbsolutePath());
+					result = 2;
+				}
 			}
 		});
+		
+		return result;
 	}
 	
 	protected File createTargetDir(String relativePath) throws IOException {
+		LogHelper.trace(log, Converter.class, "createTargetDir", relativePath);
+		
 		int index = relativePath.lastIndexOf('/');
 		if(index < 0)
 			return targetDir;
@@ -70,6 +95,8 @@ public class Converter {
 		if(!dir.exists()) {
 			if(!createTargetDirectories)
 				throw new FileNotFoundException("Target directory does not exist: " + dir.getAbsolutePath());
+			
+			log.debug("Creating target directory: " + dir.getAbsolutePath());
 			if(!dir.mkdirs())
 				throw new IOException("Unable to create target directory: " + dir.getAbsolutePath());
 		}
@@ -81,6 +108,8 @@ public class Converter {
 	}
 	
 	protected String getTargetFilename(String relativePath) {
+		LogHelper.trace(log, Converter.class, "getTargetFilename", relativePath);
+		
 		int index = relativePath.lastIndexOf('/');
 		String filename = index < 0 ? relativePath : relativePath.substring(index + 1);
 		
@@ -93,6 +122,8 @@ public class Converter {
 	}
 	
 	protected FileFormat getSourceFileFormat(File file) throws IOException {
+		LogHelper.trace(log, Converter.class, "getSourceFileFormat", file);
+		
 		if(sourceFormat != null)
 			return sourceFormat;
 		
@@ -113,6 +144,8 @@ public class Converter {
 	}
 	
 	protected void convertFile(FileFormat sourceFileFormat, File sourceFile, FileFormat targetFileFormat, File targetFile) throws IOException {
+		LogHelper.trace(log, Converter.class, "convert");
+		
 		// parse
 		GherkinParserFactory parserFactory = new GherkinParserFactory();
 		parserFactory.setFile(sourceFile);

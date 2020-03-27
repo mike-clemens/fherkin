@@ -1,5 +1,6 @@
 package fherkin.io.impl;
 
+import fherkin.LogHelper;
 import fherkin.model.GherkinEntry;
 import fherkin.model.datatable.DataTable;
 import fherkin.model.datatable.DataTable.CellType;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -45,6 +48,8 @@ import org.apache.poi.ss.util.CellRangeAddress;
 public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWriter {
 
 	protected static final Pattern VARIABLE_PATTERN = Pattern.compile("\\<\\S.*?\\S\\>");
+	
+	protected Log log = LogFactory.getLog(getClass());
 	
 	protected Workbook workbook;
 	protected OutputStream outputStream;
@@ -82,6 +87,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	
 	@Override
 	public void write(List<GherkinEntry> entries) throws IOException {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "write");
+		
 		Workbook workbook = newWorkbook();
 		Sheet sheet = newSheet(workbook, filename);
 		maxColumn = 0;
@@ -110,12 +117,16 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 	
 	protected void adjustColumnWidths(Sheet sheet) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "adjustColumnWidths", sheet);
+		
 		sheet.autoSizeColumn(0);
 		for(int i = 2; i < maxColumn; i++)
 			sheet.autoSizeColumn(i);
 	}
 		
 	protected void writeFeature(Sheet sheet, Feature feature) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "writeFeature", sheet, feature);
+		
 		// if the feature has any tags, write them prior to the feature line
 		if(feature.getTags() != null && feature.getTags().size() > 0)
 			for(Tag tag : feature.getTags())
@@ -154,6 +165,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 	
 	protected void writeScenario(Sheet sheet, Scenario scenario) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "writeScenario", sheet, scenario);
+		
 		newRow(sheet);
 		
 		// if the scenario has any tags, write them prior to the feature line
@@ -208,6 +221,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 	
 	protected void writeStep(Sheet sheet, Step step) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "writeStep", sheet, step);
+		
 		Pair<String, Boolean>[] tokens = extractTextVariables(step.getText().trim());
 		CellStyleConfig cellStyle;
 		FontConfig font;
@@ -290,6 +305,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 	
 	protected void writeExamples(Sheet sheet, Examples examples) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "writeExamples", sheet, examples);
+		
 		Row row = newRow(sheet);
 		
 		Cell b = newCell(row, 1);
@@ -306,6 +323,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 	
 	protected void writeDataTableRow(Sheet sheet, DataTableRow dataTableRow) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "writeDataTableRow", sheet, dataTableRow);
+		
 		Row row = newRow(sheet);
 		
 		DataTable dataTable = dataTableRow.getDataTable();
@@ -365,6 +384,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 	
 	protected void writeTag(Sheet sheet, Tag tag) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "writeTag", sheet, tag);
+		
 		Row row = newRow(sheet);
 		Cell cell = newCell(row, 1);
 		
@@ -381,6 +402,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 	
 	protected void writeComment(Sheet sheet, Comment comment) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "writeComment", sheet, comment);
+		
 		Row row = newRow(sheet);
 		Cell cell = newCell(row, 0);
 		setCellStyleAndFont(cell, spreadsheetStyleConfig.getCommentCellStyle(), spreadsheetStyleConfig.getCommentFont());
@@ -391,6 +414,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	
 	@SuppressWarnings("unchecked")
 	protected Pair<String, Boolean>[] extractTextVariables(String text) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "extractTextVariables", text);
+		
 		Matcher matcher = VARIABLE_PATTERN.matcher(text);
 		List<Pair<String, Boolean>> list = new ArrayList<Pair<String, Boolean>>();
 		int position = 0;
@@ -411,6 +436,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 
 	protected void setCellStyleAndFont(Cell cell, CellStyleConfig styleConfig, FontConfig fontConfig) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "setCellStyleAndFont", cell, styleConfig, fontConfig);
+		
 		CellStyle style = fontAndCellStyles.get(new Pair<CellStyleConfig, FontConfig>(styleConfig, fontConfig));
 		if(style == null) {
 			style = getCellStyleAndFont(styleConfig, fontConfig);
@@ -421,6 +448,8 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 	
 	protected void setCellStyle(Cell cell, CellStyleConfig styleConfig) {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "setCellStyle", cell, styleConfig);
+		
 		CellStyle style = cellStyles.get(styleConfig);
 		if(style == null) {
 			style = getCellStyle(styleConfig);
@@ -431,8 +460,12 @@ public abstract class AbstractSpreadsheetGherkinWriter extends AbstractGherkinWr
 	}
 	
 	protected void doWrite(Workbook workbook) throws IOException {
+		LogHelper.trace(log, AbstractSpreadsheetGherkinWriter.class, "doWrite", workbook);
+		
 		workbook.write(outputStream);
 		outputStream.close();
+		
+		log.debug("Wrote file: " + filename);
 	}
 	
 	///// worksheet methods
