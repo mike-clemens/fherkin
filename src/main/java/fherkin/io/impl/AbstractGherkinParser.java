@@ -57,13 +57,14 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 		Comment comment = processComment(tokens);
 		
 		if(text.length() < 1) {
-			if(comment != null)
+			if(comment != null) {
 				entries.add(comment);
-			
-			if(stack.size() < 1 && comment.getText().trim().startsWith("language: ")) {
-				String locale = comment.getText().trim().substring("language: ".length()).trim();
-				log.debug("Changing locale: " + locale);
-				keywords = GherkinKeywordsFactory.getInstance().getInstanceForLocale(locale);
+				
+				if(stack.size() < 1 && comment.getText().trim().startsWith("language: ")) {
+					String locale = comment.getText().trim().substring("language: ".length()).trim();
+					log.debug("Changing locale: " + locale);
+					keywords = GherkinKeywordsFactory.getInstance().getInstanceForLocale(locale);
+				}
 			}
 		}
 		else
