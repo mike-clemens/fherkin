@@ -466,6 +466,123 @@ public abstract class AbstractParseTest {
 		Assert.assertFalse(iterator.hasNext());
 	}
 	
+	@Test
+	public void testParseHeadBlankLines() throws Exception {
+		List<GherkinEntry> entries = doParse("headBlankLines");
+		Iterator<GherkinEntry> iterator = entries.iterator();
+		Step step;
+		Comment comment;
+		
+		// contents
+		comment = (Comment) iterator.next();
+		Assert.assertEquals("", comment.getText());
+		
+		comment = (Comment) iterator.next();
+		Assert.assertEquals(" Feature file containing blank lines prior to the first comment", comment.getText());
+		
+		comment = (Comment) iterator.next();
+		Assert.assertEquals("", comment.getText());
+		
+		Feature feature = (Feature) iterator.next();
+		Assert.assertEquals("Feature", feature.getKeyword());
+		Assert.assertEquals("Scenario feature file", feature.getText());
+		
+		Background background = (Background) iterator.next();
+		Assert.assertEquals("Background", background.getKeyword());
+		Assert.assertEquals("Buy some cucumbers", background.getText());
+		Assert.assertSame(feature, background.getFeature());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("*", step.getKeyword());
+		Assert.assertEquals("Go to the store", step.getText());
+		Assert.assertSame(background, step.getScenario());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("*", step.getKeyword());
+		Assert.assertEquals("Buy some cucumbers", step.getText());
+		Assert.assertSame(background, step.getScenario());
+		
+		Scenario scenario = (Scenario) iterator.next();
+		Assert.assertEquals("Scenario", scenario.getKeyword());
+		Assert.assertEquals("Simple scenario", scenario.getText());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("Given", step.getKeyword());
+		Assert.assertEquals("I have 5 cucumbers", step.getText());
+		Assert.assertSame(scenario, step.getScenario());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("But", step.getKeyword());
+		Assert.assertEquals("I somehow acquire another 5 cucumbers", step.getText());
+		Assert.assertSame(scenario, step.getScenario());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("When", step.getKeyword());
+		Assert.assertEquals("I eat 3 cucumbers", step.getText());
+		Assert.assertSame(scenario, step.getScenario());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("And", step.getKeyword());
+		Assert.assertEquals("I throw away another 3 cucumbers", step.getText());
+		Assert.assertSame(scenario, step.getScenario());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("Then", step.getKeyword());
+		Assert.assertEquals("I will have 4 cucumbers", step.getText());
+		Assert.assertSame(scenario, step.getScenario());
+		
+		Assert.assertFalse(iterator.hasNext());
+	}
+	
+	@Test
+	public void testParseKeywordsInFeatureDesc() throws Exception {
+		List<GherkinEntry> entries = doParse("keywordsInFeatureDesc");
+		Iterator<GherkinEntry> iterator = entries.iterator();
+		Step step;
+		Comment comment;
+		
+		// contents
+		comment = (Comment) iterator.next();
+		Assert.assertEquals("", comment.getText());
+		
+		comment = (Comment) iterator.next();
+		Assert.assertEquals(" Feature file with keywords in the multi-line feature heading", comment.getText());
+		
+		comment = (Comment) iterator.next();
+		Assert.assertEquals("", comment.getText());
+		
+		Feature feature = (Feature) iterator.next();
+		Assert.assertEquals("Feature", feature.getKeyword());
+		Assert.assertEquals("This feature file contains keywords in the feature text.", feature.getText());
+		Assert.assertArrayEquals(new String[] {
+				"For example:",
+				"Given there are keywords in the feature text",
+				"When I parse the feature file",
+				"Then they will be included in the feature description"
+		}, feature.getAdditionalText().toArray());
+		
+		Scenario scenario = (Scenario) iterator.next();
+		Assert.assertEquals("Scenario", scenario.getKeyword());
+		Assert.assertEquals("Test scenario", scenario.getText());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("Given", step.getKeyword());
+		Assert.assertEquals("there are keywords in the feature text", step.getText());
+		Assert.assertSame(scenario, step.getScenario());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("When", step.getKeyword());
+		Assert.assertEquals("I parse the feature file", step.getText());
+		Assert.assertSame(scenario, step.getScenario());
+		
+		step = (Step) iterator.next();
+		Assert.assertEquals("Then", step.getKeyword());
+		Assert.assertEquals("they will be included in the feature description", step.getText());
+		Assert.assertSame(scenario, step.getScenario());
+		
+		Assert.assertFalse(iterator.hasNext());
+	}
+	
 	protected abstract List<GherkinEntry> doParse(String name) throws Exception;
 
 }

@@ -43,6 +43,7 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 	protected List<GherkinEntry> entries = new ArrayList<GherkinEntry>();
 	protected Stack<GherkinEntry> stack = new Stack<GherkinEntry>();
 	protected List<Tag> tags;
+	protected boolean inFeature = false;
 	
 	public AbstractGherkinParser() {
 		keywords = GherkinKeywordsFactory.getInstance().getDefaultInstance();
@@ -83,6 +84,12 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 		if(isMatch(text, keywords.getRule()))
 			processFeatureChild(tokens, getMatch(text, keywords.getRule()), getTokensString(tokens), start, comment, GherkinKeywordType.RULE);
 		else
+		if(text.startsWith("@"))
+			processTags(tokens, text, start, comment);
+		else
+		if(inFeature)
+			((Feature) stack.peek()).addAdditionalText(getTokensString(tokens));
+		else
 		if(isMatch(text, keywords.getGiven()))
 			processStep(tokens, getMatch(text, keywords.getGiven()), getTokensString(tokens), start, comment, GherkinKeywordType.GIVEN);
 		else
@@ -104,20 +111,7 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 		if(text.startsWith("|"))
 			processDataTable(tokens, text, start, comment);
 		else
-		if(text.startsWith("@"))
-			processTags(tokens, text, start, comment);
-		else
-		
-		// if we are still processing the feature, then this could be additional text lines
-		if(stack.size() > 0 && stack.peek() instanceof Feature) {
-			Feature feature = (Feature) stack.peek();
-			feature.addAdditionalText(text.trim());
-		}
-		else {
-			for(char c : text.toCharArray())
-				System.out.println("==> " + (int)c);
 			throw new GherkinSyntaxException(start, "Unexpected token: " + text);
-		}
 		
 		// TODO blow up here???
 	}
@@ -226,6 +220,7 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 		
 		stack.push(feature);
 		entries.add(feature);
+		inFeature = true;
 	}
 	
 	protected void processFeatureChild(SortedMap<Location, String> tokens, String keyword, String text, Location start, Comment comment, GherkinKeywordType type) {
@@ -304,6 +299,8 @@ public abstract class AbstractGherkinParser implements GherkinParser {
 		}
 		
 		// TODO rule
+		
+		inFeature = false;
 	}
 	
 	protected void processStep(SortedMap<Location, String> tokens, String keyword, String text, Location start, Comment comment, GherkinKeywordType type) {
